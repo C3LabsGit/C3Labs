@@ -23,18 +23,18 @@ export default function ProjectsSection() {
     {
       name: "Convenience",
       description:
-        "Convenience is an AI-powered marketplace and operations suite designed to revolutionize how convenience stores operate and compete in the digital age. With integrations to major platforms like DoorDash, Uber Eats, Instacart, and Yelp, Convenience provides SEO-optimized microsites with unified Stripe Connect checkout, centralized order management, AI-driven analytics and marketing, plus inventory and staffing forecasts. Operating on a revenue model of $500/month plus platform fees and per-order commission, Convenience targets a $14.8 billion market opportunity across 150,000+ U.S. stores.",
+        "Convenience is an AI-powered marketplace and operations suite designed to help convenience stores thrive in the digital age. Our platform streamlines operations, enhances customer experience, and provides powerful tools for modern retail management. By integrating with popular delivery platforms and providing comprehensive analytics, Convenience empowers store owners to compete effectively in today's market.",
       image:
         "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/morgan-von-gunten-IF2PxIT7UNE-unsplash%20%281%29.jpg-vvQO4IfDYOqLtfagRvmIEe0cZoOu7A.jpeg",
       link: "https://v0-convenience.vercel.app/",
       features: [
-        "AI-powered marketplace + operations suite",
-        "Integrations: DoorDash, Uber Eats, Instacart, Yelp",
-        "SEO-optimized microsites & unified Stripe Connect checkout",
-        "Centralized order management, AI analytics & marketing",
-        "Inventory & staffing forecasts",
-        "Revenue model: $500/month + platform fees + per-order commission",
-        "$14.8B market opportunity across 150K+ U.S. stores",
+        "AI-powered marketplace and operations management",
+        "Seamless integrations with major delivery platforms",
+        "SEO-optimized microsites for enhanced online presence",
+        "Unified checkout and payment processing",
+        "Centralized order management system",
+        "Advanced analytics and marketing tools",
+        "Smart inventory and staffing insights",
       ],
     },
   ]
