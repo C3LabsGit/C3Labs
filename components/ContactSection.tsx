@@ -10,11 +10,15 @@ const ContactSection = () => {
     name: "",
     email: "",
     phone: "",
+    linkedin: "",
+    instagram: "",
+    facebook: "",
+    contactReason: "",
     message: "",
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData((prevData) => ({ ...prevData, [name]: value }))
   }
@@ -37,7 +41,16 @@ const ContactSection = () => {
           title: "Message sent successfully",
           description: "Thank you for contacting us. We'll be in touch soon!",
         })
-        setFormData({ name: "", email: "", phone: "", message: "" })
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          linkedin: "",
+          instagram: "",
+          facebook: "",
+          contactReason: "",
+          message: "",
+        })
       } else {
         throw new Error("Failed to send message")
       }
@@ -58,7 +71,7 @@ const ContactSection = () => {
         <form className="max-w-lg mx-auto" onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="name" className="block text-gray-700 mb-2">
-              Name
+              Name *
             </label>
             <input
               type="text"
@@ -72,7 +85,7 @@ const ContactSection = () => {
           </div>
           <div className="mb-4">
             <label htmlFor="email" className="block text-gray-700 mb-2">
-              Email
+              Email *
             </label>
             <input
               type="email"
@@ -86,7 +99,7 @@ const ContactSection = () => {
           </div>
           <div className="mb-4">
             <label htmlFor="phone" className="block text-gray-700 mb-2">
-              Phone Number
+              Phone Number *
             </label>
             <input
               type="tel"
@@ -95,11 +108,73 @@ const ContactSection = () => {
               value={formData.phone}
               onChange={handleChange}
               className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+              required
             />
           </div>
           <div className="mb-4">
+            <label htmlFor="linkedin" className="block text-gray-700 mb-2">
+              LinkedIn *
+            </label>
+            <input
+              type="url"
+              id="linkedin"
+              name="linkedin"
+              value={formData.linkedin}
+              onChange={handleChange}
+              placeholder="https://linkedin.com/in/yourprofile"
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="instagram" className="block text-gray-700 mb-2">
+              Instagram
+            </label>
+            <input
+              type="text"
+              id="instagram"
+              name="instagram"
+              value={formData.instagram}
+              onChange={handleChange}
+              placeholder="@yourusername"
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="facebook" className="block text-gray-700 mb-2">
+              Facebook
+            </label>
+            <input
+              type="text"
+              id="facebook"
+              name="facebook"
+              value={formData.facebook}
+              onChange={handleChange}
+              placeholder="Your Facebook profile or page"
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+            />
+          </div>
+          <div className="mb-4">
+            <label htmlFor="contactReason" className="block text-gray-700 mb-2">
+              What are you contacting us about? *
+            </label>
+            <select
+              id="contactReason"
+              name="contactReason"
+              value={formData.contactReason}
+              onChange={handleChange}
+              className="w-full px-4 py-2 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+              required
+            >
+              <option value="">Please select...</option>
+              <option value="Game On">Game On Project</option>
+              <option value="Convenience">Convenience Project</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div className="mb-4">
             <label htmlFor="message" className="block text-gray-700 mb-2">
-              Message
+              Message *
             </label>
             <textarea
               id="message"

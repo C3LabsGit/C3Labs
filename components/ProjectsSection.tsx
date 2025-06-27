@@ -25,7 +25,7 @@ export default function ProjectsSection() {
       description:
         "Convenience is an AI-powered marketplace and operations suite designed to help convenience stores thrive in the digital age. Our platform streamlines operations, enhances customer experience, and provides powerful tools for modern retail management. By integrating with popular delivery platforms and providing comprehensive analytics, Convenience empowers store owners to compete effectively in today's market.",
       image:
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/morgan-von-gunten-IF2PxIT7UNE-unsplash%20%281%29.jpg-vvQO4IfDYOqLtfagRvmIEe0cZoOu7A.jpeg",
+        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/FBF38134-95DE-427B-B2B8-123492FF3761.PNG-e6EN3Bd1wbCce2QfIMYAMvFeTJJvNq.png",
       link: "https://v0-convenience.vercel.app/",
       features: [
         "AI-powered marketplace and operations management",
