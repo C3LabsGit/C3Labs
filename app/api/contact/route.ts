@@ -1,28 +1,14 @@
 import { NextResponse } from "next/server"
-import nodemailer from "nodemailer"
-import twilio from "twilio"
-
-const twilioClient = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
 
 export async function POST(req: Request) {
-  const { name, email, phone, linkedin, instagram, facebook, contactReason, message } = await req.json()
-
-  // Validate required fields
-  if (!name || !email || !phone || !linkedin || !message || !contactReason) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
-  }
-
-  const transporter = nodemailer.createTransporter({
-    host: process.env.EMAIL_HOST,
-    port: Number(process.env.EMAIL_PORT),
-    secure: process.env.EMAIL_SECURE === "true",
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  })
-
   try {
+    const { name, email, phone, linkedin, instagram, facebook, contactReason, message } = await req.json()
+
+    // Validate required fields
+    if (!name || !email || !phone || !linkedin || !message || !contactReason) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
+    }
+
     // Prepare contact information
     const contactInfo = `
 Name: ${name}
@@ -35,55 +21,146 @@ Contact Reason: ${contactReason}
 Message: ${message}
     `
 
-    // Send email to C3 Labs team
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
-      to: process.env.EMAIL_TO,
-      subject: `New Contact Form Submission - ${contactReason}`,
-      text: `New contact form submission received:\n\n${contactInfo}`,
+    console.log("Contact form submission received:", contactInfo)
+
+    // Check Twilio configuration
+    const twilioSid = process.env.TWILIO_ACCOUNT_SID
+    const twilioToken = process.env.TWILIO_AUTH_TOKEN
+    const twilioPhone = process.env.TWILIO_PHONE_NUMBER
+    const chuksPhone = process.env.CHUKS_PHONE
+    const uchennaPhone = process.env.UCHENNA_PHONE
+
+    console.log("Twilio config check:", {
+      hasSid: !!twilioSid,
+      hasToken: !!twilioToken,
+      hasTwilioPhone: !!twilioPhone,
+      hasChuksPhone: !!chuksPhone,
+      hasUchennaPhone: !!uchennaPhone,
     })
 
-    // Send thank you email to the user
-    await transporter.sendMail({
-      from: process.env.EMAIL_FROM,
-      to: email,
-      subject: "Thank you for contacting C3 Labs",
-      text: `
-Dear ${name},
+    // Send SMS notifications using Twilio REST API directly
+    if (twilioSid && twilioToken && twilioPhone) {
+      try {
+        console.log("Using Twilio REST API directly")
 
-Thank you for reaching out to C3 Labs. We have received your message regarding ${contactReason} and will be in touch shortly.
+        const auth = Buffer.from(`${twilioSid}:${twilioToken}`).toString("base64")
+        const smsMessage = `New C3 Labs contact: ${name} (${email}) - ${contactReason}. Phone: ${phone}, LinkedIn: ${linkedin}. Message: ${message.substring(0, 100)}${message.length > 100 ? "..." : ""}`
 
-In the meantime, you can follow us on Instagram for more updates: https://www.instagram.com/c3labs/
+        console.log("Preparing to send SMS with message length:", smsMessage.length)
 
-Best regards,
-The C3 Labs Team
-      `,
-    })
+        // Send to team members
+        const teamNumbers = [chuksPhone, uchennaPhone].filter(Boolean)
+        console.log("Team numbers to notify:", teamNumbers.length)
 
-    // Send SMS to C3 Labs team members
-    const smsMessage = `New C3 Labs contact: ${name} (${email}) - ${contactReason}. Phone: ${phone}, LinkedIn: ${linkedin}. Message: ${message.substring(0, 100)}${message.length > 100 ? "..." : ""}`
+        for (const phoneNumber of teamNumbers) {
+          if (phoneNumber) {
+            try {
+              console.log(`Sending SMS to team member: ${phoneNumber.substring(0, 5)}...`)
 
-    // Send to both team members
-    const teamNumbers = [process.env.CHUKS_PHONE, process.env.UCHENNA_PHONE].filter(Boolean)
+              const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+                method: "POST",
+                headers: {
+                  Authorization: `Basic ${auth}`,
+                  "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: new URLSearchParams({
+                  From: twilioPhone,
+                  To: phoneNumber,
+                  Body: smsMessage,
+                }),
+              })
 
-    for (const phoneNumber of teamNumbers) {
-      await twilioClient.messages.create({
-        body: smsMessage,
-        from: process.env.TWILIO_PHONE_NUMBER,
-        to: phoneNumber,
-      })
+              if (response.ok) {
+                const result = await response.json()
+                console.log(`SMS sent successfully to ${phoneNumber.substring(0, 5)}..., SID: ${result.sid}`)
+              } else {
+                const errorText = await response.text()
+                console.error(`Failed to send SMS to ${phoneNumber.substring(0, 5)}...:`, {
+                  status: response.status,
+                  statusText: response.statusText,
+                  error: errorText,
+                })
+              }
+            } catch (smsError) {
+              console.error(`SMS error for ${phoneNumber.substring(0, 5)}...:`, smsError)
+            }
+          }
+        }
+
+        // Send thank you SMS to user
+        if (phone && phone.length >= 10) {
+          try {
+            console.log(`Sending thank you SMS to user: ${phone.substring(0, 5)}...`)
+
+            const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
+              method: "POST",
+              headers: {
+                Authorization: `Basic ${auth}`,
+                "Content-Type": "application/x-www-form-urlencoded",
+              },
+              body: new URLSearchParams({
+                From: twilioPhone,
+                To: phone,
+                Body: `Hi ${name}! Thank you for contacting C3 Labs. We received your message about ${contactReason} and will get back to you soon. - C3 Labs Team`,
+              }),
+            })
+
+            if (response.ok) {
+              const result = await response.json()
+              console.log(`Thank you SMS sent successfully to user, SID: ${result.sid}`)
+            } else {
+              const errorText = await response.text()
+              console.error("Failed to send thank you SMS to user:", {
+                status: response.status,
+                statusText: response.statusText,
+                error: errorText,
+              })
+            }
+          } catch (userSmsError) {
+            console.error("SMS error for user:", userSmsError)
+          }
+        } else {
+          console.log("User phone number invalid or too short:", phone)
+        }
+      } catch (twilioError) {
+        console.error("Twilio API error:", twilioError)
+        return NextResponse.json(
+          {
+            error: "SMS sending failed",
+            details: twilioError instanceof Error ? twilioError.message : "Unknown Twilio API error",
+          },
+          { status: 500 },
+        )
+      }
+    } else {
+      console.log("Twilio not configured - missing credentials")
+      return NextResponse.json(
+        {
+          error: "SMS service not configured",
+          details: "Missing Twilio credentials",
+        },
+        { status: 500 },
+      )
     }
 
-    // Send thank you SMS to the user
-    await twilioClient.messages.create({
-      body: `Hi ${name}! Thank you for contacting C3 Labs. We received your message about ${contactReason} and will get back to you soon. - C3 Labs Team`,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: phone,
-    })
-
-    return NextResponse.json({ message: "Contact form submitted successfully" }, { status: 200 })
+    return NextResponse.json(
+      {
+        message: "Contact form submitted successfully",
+        debug: {
+          twilioConfigured: !!(twilioSid && twilioToken && twilioPhone),
+          teamMembersConfigured: !!(chuksPhone && uchennaPhone),
+        },
+      },
+      { status: 200 },
+    )
   } catch (error) {
     console.error("Error processing contact form:", error)
-    return NextResponse.json({ error: "Failed to process contact form" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Failed to process contact form",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    )
   }
 }
